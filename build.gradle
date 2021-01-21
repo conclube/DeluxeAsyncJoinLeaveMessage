@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group 'me.conclure'
+version '1.0.0'
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot:1.16.4-R0.1-SNAPSHOT'
+    implementation 'org.jetbrains:annotations:20.1.0'
+}
+
+test {
+    useJUnitPlatform()
+}
