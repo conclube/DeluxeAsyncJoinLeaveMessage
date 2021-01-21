@@ -227,7 +227,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
             @Nullable
             @NotNull
             @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-            public void onJoin(final@NotNull@Nullable PlayerJoinEvent event) {
+            public final void onJoin(final@NotNull@Nullable PlayerJoinEvent event) {
                 CompletableFuture.runAsync(
                         () -> Bukkit.getServer()
                                     .getOnlinePlayers()
@@ -245,7 +245,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
             @Nullable
             @NotNull
             @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-            public void onQuit(final@NotNull@Nullable PlayerQuitEvent event) {
+            public final void onQuit(final@NotNull@Nullable PlayerQuitEvent event) {
                 CompletableFuture.runAsync(
                         () -> Bukkit.getServer()
                                     .getOnlinePlayers()
