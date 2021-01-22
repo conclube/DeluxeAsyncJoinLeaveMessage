@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'me.conclure'
-version 'InfinityPremiumAsync'
+version 'InfiniteVectorSpace'
 
 repositories {
     mavenLocal()
