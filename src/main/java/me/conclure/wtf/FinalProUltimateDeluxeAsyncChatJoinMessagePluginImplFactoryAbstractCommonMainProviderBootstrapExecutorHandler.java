@@ -2,12 +2,14 @@ package me.conclure.wtf;
 
 import com.google.common.collect.ForwardingConcurrentMap;
 import com.google.common.collect.MapMaker;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -22,8 +24,13 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.misc.Unsafe;
 
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -49,6 +56,7 @@ import java.util.function.Supplier;
 //make all IDEs stfu
 @SuppressWarnings("all")
 //make sure our class is never null but also might be null cuz u know async is two things concurrently yekies
+@DelegateDeserialization(FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.class)
 @NonNls
 @Nullable
 @NotNull
@@ -68,6 +76,10 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull @Nullable @NonNls Runnable,
         @NotNull @Nullable @NonNls Iterable<@NotNull @Nullable @NonNls FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler>{
 
+    @NonNls
+    @Nullable
+    @NotNull
+    public static transient volatile Unsafe DaUnsafe;
     //cache constant true and random keywords to make it look better
     @NonNls
     @Nullable
@@ -81,8 +93,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @Nullable
     @NotNull
     public static transient volatile ExecutorService EXECUTOR;
+    @NonNls
+    @Nullable
+    @NotNull
+    public static transient volatile Map<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Player> CACHED_PLAYER_MAP;
 
     static{
+        try{
+            DaUnsafe=(Unsafe)FieldUtils.readDeclaredStaticField(Unsafe.class,"theUnsafe",true);
+        }catch(final @NotNull @Nullable @NonNls Throwable e){
+            throw new Error(new ReflectiveOperationException(e));
+        }
         TRUE=true;
         serialVersionUID=69;
         EXECUTOR=new ForkJoinPool(
@@ -91,6 +112,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
                 (t,e)->Thread.dumpStack(),
                 FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.TRUE
         );
+        CACHED_PLAYER_MAP=new ConcurrentHashMap<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Player>();
     }
 
     @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -273,11 +295,13 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
             @Override
             protected final ConcurrentMap<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object> delegate(){
                 return new ConcurrentHashMap<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>(new MapMaker()
-                        .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>concurrencyLevel(1)
-                        .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>weakKeys()
-                        .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>weakValues()
-                        .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>initialCapacity(1)
-                        .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>makeMap()
+                                                                                                                          .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>concurrencyLevel(
+                                                                                                                                  1)
+                                                                                                                          .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>weakKeys()
+                                                                                                                          .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>weakValues()
+                                                                                                                          .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>initialCapacity(
+                                                                                                                                  1)
+                                                                                                                          .<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Object>makeMap()
                 );
             }
         };
@@ -294,141 +318,167 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
             //boostrap our plugin async
             CompletableFuture.<@NotNull @Nullable @NonNls Void>runAsync(
                     ()->{
-                        try{
-                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.super
-                                    .saveDefaultConfig();
-                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.super
-                                    .reloadConfig();
-                            Bukkit.getServer().getPluginManager().registerEvents(
-                                    new Listener(){
-
-                                        @Contract("random")
-                                        @NonNls
-                                        @Nullable
-                                        @NotNull
-                                        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-                                        public final void onJoin(final @NotNull @Nullable @NonNls PlayerJoinEvent event){
-                                            CompletableFuture.<@NotNull @Nullable @NonNls Void>runAsync(
-                                                    ()->Bukkit.getServer()
-                                                            .<@NotNull @Nullable @NonNls Player>getOnlinePlayers()
-                                                            .<@NotNull @Nullable @NonNls Player>stream()
-                                                            .<@NotNull @Nullable @NonNls Player>peek(player->player.sendMessage(
-                                                                    ChatColor.translateAlternateColorCodes('&',Objects.requireNonNull(
-                                                                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
-                                                                                    .getConfig()
-                                                                                    .getString("join")))))
-                                                            .<@NotNull @Nullable @NonNls Player>close(),
-                                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
-                                            ).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PrePreAsyncLeavePlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PreAsyncLeavePlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PostPreAsyncLeavePlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new AsyncLeavePlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PrePostAsyncLeavePlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PostAsyncLeavePlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PostPostAsyncLeavePlayerEvent(
-                                                              event.getPlayer()));
-                                            });
-                                        }
-
-                                        @Contract("random")
-                                        @NonNls
-                                        @Nullable
-                                        @NotNull
-                                        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-                                        public final void onQuit(final @NotNull @Nullable @NonNls PlayerQuitEvent event){
-                                            CompletableFuture.<@NotNull @Nullable @NonNls Void>runAsync(
-                                                    ()->Bukkit.getServer()
-                                                            .<@NotNull @Nullable @NonNls Player>getOnlinePlayers()
-                                                            .<@NotNull @Nullable @NonNls Player>stream()
-                                                            .<@NotNull @Nullable @NonNls Player>peek(player->player.sendMessage(
-                                                                    ChatColor.translateAlternateColorCodes('&',Objects.requireNonNull(
-                                                                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
-                                                                                    .getConfig()
-                                                                                    .getString("quit")))))
-                                                            .<@NotNull @Nullable @NonNls Player>close(),
-                                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
-                                            ).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PrePreAsyncJoinPlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PreAsyncJoinPlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PostPreAsyncJoinPlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new AsyncJoinPlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PrePostAsyncJoinPlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PostAsyncJoinPlayerEvent(
-                                                              event.getPlayer()));
-                                            }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
-                                                Bukkit.getServer()
-                                                      .getPluginManager()
-                                                      .callEvent(new PostPostAsyncJoinPlayerEvent(
-                                                              event.getPlayer()));
-                                            });
-                                        }
-                                    },
-                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
-                            );
-                            //handle any possible error asynchronously
-                        }catch(Throwable e){
-                            Bukkit.getServer().getScheduler().runTaskAsynchronously(
-                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this,
-                                    ()->{
-                                        //This sounds like it has to do with async therefore we use it
-                                        throw new ConcurrentModificationException(e);
-                                    }
-                            );
-                        }
+                        Bukkit.<@NotNull @Nullable @NonNls Player>getOnlinePlayers()
+                                .<@NotNull @Nullable @NonNls Player>stream()
+                                .<@NotNull @Nullable @NonNls Player>parallel()
+                                .<@NotNull @Nullable @NonNls Player>peek(player->FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.CACHED_PLAYER_MAP.<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Player>put(
+                                        player.getName(),
+                                        player
+                                ))
+                                .<@NotNull @Nullable @NonNls Player>close();
                     },
                     FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
-            );
-            //handle any possible error asynchronously
-        }catch(Throwable e){
+            ).<@NotNull @Nullable @NonNls Void>thenRun(()->{
+                try{
+                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.super
+                            .saveDefaultConfig();
+                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.super
+                            .reloadConfig();
+                    Bukkit.getServer().getPluginManager().registerEvents(
+                            new Listener(){
+
+                                @Contract("random")
+                                @NonNls
+                                @Nullable
+                                @NotNull
+                                @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+                                public final void onJoin(final @NotNull @Nullable @NonNls PlayerJoinEvent event){
+                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.CACHED_PLAYER_MAP.<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Player>put(
+                                            event.getPlayer().getName(),
+                                            event.getPlayer()
+                                    );
+                                    CompletableFuture.<@NotNull @Nullable @NonNls Void>runAsync(
+                                            ()->FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.CACHED_PLAYER_MAP
+                                                    .<@NotNull @Nullable @NonNls Player>values()
+                                                    .<@NotNull @Nullable @NonNls Player>stream()
+                                                    .<@NotNull @Nullable @NonNls Player>parallel()
+                                                    .<@NotNull @Nullable @NonNls Player>peek(player->player
+                                                            .sendMessage(
+                                                                    ChatColor.translateAlternateColorCodes(
+                                                                            '&',
+                                                                            Objects.requireNonNull(
+                                                                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
+                                                                                            .getConfig()
+                                                                                            .getString(
+                                                                                                    "join"))
+                                                                    )))
+                                                    .<@NotNull @Nullable @NonNls Player>close(),
+                                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
+                                    ).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PrePreAsyncLeavePlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PreAsyncLeavePlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PostPreAsyncLeavePlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new AsyncLeavePlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PrePostAsyncLeavePlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PostAsyncLeavePlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PostPostAsyncLeavePlayerEvent(
+                                                      event.getPlayer()));
+                                    });
+                                }
+
+                                @Contract("random")
+                                @NonNls
+                                @Nullable
+                                @NotNull
+                                @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+                                public final void onQuit(final @NotNull @Nullable @NonNls PlayerQuitEvent event){
+                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.CACHED_PLAYER_MAP.<@NotNull @Nullable @NonNls String,@NotNull @Nullable @NonNls Player>remove(
+                                            event.getPlayer().getName());
+                                    CompletableFuture.<@NotNull @Nullable @NonNls Void>runAsync(
+                                            ()->FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.CACHED_PLAYER_MAP
+                                                    .<@NotNull @Nullable @NonNls Player>values()
+                                                    .<@NotNull @Nullable @NonNls Player>stream()
+                                                    .<@NotNull @Nullable @NonNls Player>parallel()
+                                                    .<@NotNull @Nullable @NonNls Player>peek(player->player
+                                                            .sendMessage(
+                                                                    ChatColor.translateAlternateColorCodes(
+                                                                            '&',
+                                                                            Objects.requireNonNull(
+                                                                                    FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
+                                                                                            .getConfig()
+                                                                                            .getString(
+                                                                                                    "quit"))
+                                                                    )))
+                                                    .<@NotNull @Nullable @NonNls Player>close(),
+                                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
+                                    ).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PrePreAsyncJoinPlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PreAsyncJoinPlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PostPreAsyncJoinPlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new AsyncJoinPlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PrePostAsyncJoinPlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PostAsyncJoinPlayerEvent(
+                                                      event.getPlayer()));
+                                    }).<@NotNull @Nullable @NonNls Void>thenRunAsync(()->{
+                                        Bukkit.getServer()
+                                              .getPluginManager()
+                                              .callEvent(new PostPostAsyncJoinPlayerEvent(
+                                                      event.getPlayer()));
+                                    });
+                                }
+                            },
+                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this
+                    );
+                    //handle any possible error asynchronously
+                }catch(final @NotNull @Nullable @NonNls Throwable e){
+                    Bukkit.getServer().getScheduler().runTaskAsynchronously(
+                            FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this,
+                            ()->{
+                                //This sounds like it has to do with async therefore we use it
+                                throw new ConcurrentModificationException(e);
+                            }
+                    );
+                }
+            });
+        }catch(final @NotNull @Nullable @NonNls Throwable e){
             Bukkit.getServer().getScheduler().runTaskAsynchronously(
                     FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAbstractCommonMainProviderBootstrapExecutorHandler.this,
                     ()->{
@@ -525,6 +575,16 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         };
     }
 
+    @NonNls
+    @Nullable
+    @NotNull
+    @Target(ElementType.PACKAGE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface PackageNonNull{
+
+    }
+
+    //sadly we cannot annotate the class type because it would not make us being able to annotate it for subclasses
     public static abstract class Abstract$Async_Event
             extends @NonNls @Nullable @NotNull Event{
 
@@ -537,8 +597,8 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public static volatile transient AtomicReference<@NonNls @Nullable @NotNull Player> THREAD_SAFE_MAYBE;
 
-        static {
-            HANDLER_LIST = new HandlerList();
+        static{
+            HANDLER_LIST=new HandlerList();
             THREAD_SAFE_MAYBE=new AtomicReference<@NonNls @Nullable @NotNull Player>();
         }
 
@@ -551,19 +611,22 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         }
     }
 
+    //WARNING code below may hurt you permanently
+
     @NonNls
     @Nullable
     @NotNull
     public static final class PrePreAsyncJoinPlayerEvent
-            extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+            extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
         @Nullable
         @NotNull
+
         public PrePreAsyncJoinPlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -571,8 +634,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -581,16 +653,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -598,7 +661,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PreAsyncJoinPlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PreAsyncJoinPlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -606,7 +669,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PreAsyncJoinPlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -614,8 +677,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -624,16 +696,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -641,7 +704,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PostPreAsyncJoinPlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PostPreAsyncJoinPlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -649,7 +712,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PostPreAsyncJoinPlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -657,8 +720,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -667,16 +739,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -684,7 +747,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class AsyncJoinPlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class AsyncJoinPlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -692,7 +755,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public AsyncJoinPlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -700,8 +763,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -710,16 +782,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -727,7 +790,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PrePostAsyncJoinPlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PrePostAsyncJoinPlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -735,7 +798,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PrePostAsyncJoinPlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -743,8 +806,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -753,16 +825,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -770,7 +833,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PostAsyncJoinPlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PostAsyncJoinPlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -778,7 +841,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PostAsyncJoinPlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -786,8 +849,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -796,16 +868,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -813,7 +876,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PostPostAsyncJoinPlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PostPostAsyncJoinPlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -821,7 +884,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PostPostAsyncJoinPlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -829,8 +892,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -839,16 +911,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -856,7 +919,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PrePreAsyncLeavePlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PrePreAsyncLeavePlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -864,7 +927,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PrePreAsyncLeavePlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -872,8 +935,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -882,16 +954,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -899,7 +962,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PreAsyncLeavePlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PreAsyncLeavePlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -907,7 +970,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PreAsyncLeavePlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -915,8 +978,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -925,16 +997,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -942,7 +1005,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PostPreAsyncLeavePlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PostPreAsyncLeavePlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -950,7 +1013,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PostPreAsyncLeavePlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -958,8 +1021,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -968,16 +1040,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -985,7 +1048,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class AsyncLeavePlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class AsyncLeavePlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -993,7 +1056,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public AsyncLeavePlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -1001,8 +1064,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -1011,16 +1083,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -1028,7 +1091,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PrePostAsyncLeavePlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PrePostAsyncLeavePlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -1036,7 +1099,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PrePostAsyncLeavePlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -1044,8 +1107,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        public final static HandlerList getHandlerList(){
+            return Abstract$Async_Event.HANDLER_LIST;
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -1054,16 +1126,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @Nullable
         @NotNull
         @Override
-        public HandlerList getHandlers(){
-            return Abstract$Async_Event.HANDLER_LIST;
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        public static HandlerList getHandlerList() {
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -1071,7 +1134,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PostAsyncLeavePlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PostAsyncLeavePlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -1079,7 +1142,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PostAsyncLeavePlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -1087,17 +1150,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        @Override
-        public HandlerList getHandlers(){
+        public final static HandlerList getHandlerList(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
 
@@ -1106,7 +1159,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public static HandlerList getHandlerList() {
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        @Override
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
@@ -1114,7 +1177,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
     @NonNls
     @Nullable
     @NotNull
-    public static final class PostPostAsyncLeavePlayerEvent extends @NonNls@Nullable@NotNull Abstract$Async_Event{
+    public static final class PostPostAsyncLeavePlayerEvent extends @NonNls @Nullable @NotNull Abstract$Async_Event{
 
         @Contract("random")
         @NonNls
@@ -1122,7 +1185,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NotNull
         public PostPostAsyncLeavePlayerEvent(@NonNls @Nullable @NotNull Player who){
             super();
-            THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
+            Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>set(who);
         }
 
         @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
@@ -1130,17 +1193,7 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public Player getPlayer(){
-            return THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
-        }
-
-        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
-        @Contract("random")
-        @NonNls
-        @Nullable
-        @NotNull
-        @Override
-        public HandlerList getHandlers(){
+        public final static HandlerList getHandlerList(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
 
@@ -1149,7 +1202,17 @@ public final class FinalProUltimateDeluxeAsyncChatJoinMessagePluginImplFactoryAb
         @NonNls
         @Nullable
         @NotNull
-        public static HandlerList getHandlerList() {
+        public final Player getPlayer(){
+            return Abstract$Async_Event.THREAD_SAFE_MAYBE.<@NonNls @Nullable @NotNull Player>get();
+        }
+
+        @EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
+        @Contract("random")
+        @NonNls
+        @Nullable
+        @NotNull
+        @Override
+        public final HandlerList getHandlers(){
             return Abstract$Async_Event.HANDLER_LIST;
         }
     }
